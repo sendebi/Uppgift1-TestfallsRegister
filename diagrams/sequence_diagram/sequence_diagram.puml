@@ -1,0 +1,146 @@
+
+@startuml sequence_diagram
+title Testfallregister - Sequence Diagram
+
+actor User
+participant "main.py" as Main
+participant "ConsoleDialog" as Dialog
+participant "TestCaseManager" as Manager
+participant "TestCaseRepository" as Repository
+participant "TestCase" as TestCase
+
+== Add Test Case ==
+
+User -> Main: Select Add Test Case
+Main -> Dialog: Ask for test case details
+Dialog -> User: Request title, description\nand expected result
+User -> Dialog: Enter test case details
+Dialog --> Main: Return entered details
+
+Main -> Manager: add_test_case(title, description, expected_result)
+Manager -> Manager: Normalize and validate input
+
+alt Input is valid
+    Manager -> TestCase: Create TestCase object
+    TestCase --> Manager: Return object with generated UUID
+
+    Manager -> Repository: generate_test_case_number()
+    Repository --> Manager: Return TC_01
+
+    Manager -> TestCase: Set test_case_number
+    Manager -> Repository: add(test_case)
+    Repository --> Manager: Confirm storage
+
+    Manager --> Main: Return TC_01
+    Main -> Dialog: Display success message
+    Dialog -> User: Show TC_01
+end
+
+== Show Test Cases ==
+
+User -> Main: Select Show Test Cases
+Main -> Manager: show_test_cases()
+Manager -> Repository: get_all()
+Repository --> Manager: Return list of TestCase objects
+Manager --> Main: Return list of TestCase objects
+Main -> Dialog: Display test cases
+Dialog -> User: Show all saved test cases
+
+
+== Edit Test Case ==
+
+User -> Main: Select Edit Test Case
+Main -> Dialog: Request test case number
+Dialog -> User: Enter test case number
+User -> Dialog: Enter TC_01
+Dialog --> Main: Return test case number
+
+Main -> Dialog: Request new test case details
+Dialog -> User: Enter new title, description\nand expected result
+User -> Dialog: Submit updated details
+Dialog --> Main: Return updated details
+
+Main -> Manager: edit_test_case(TC_01, title, description, expected_result)
+Manager -> Manager: Normalize and validate input
+
+alt Input is valid
+    Manager -> Repository: find_by_number(TC_01)
+    Repository --> Manager: Return TestCase object or None
+
+    alt Test case found
+        Manager -> TestCase: Update title, description\nand expected_result
+        Manager --> Main: Return True
+        Main -> Dialog: Display success message
+        Dialog -> User: Show edit successful
+
+    else Test case not found
+        Manager --> Main: Return False
+        Main -> Dialog: Display error message
+        Dialog -> User: Show test case not found
+    end
+
+else Input is invalid
+    Manager --> Main: Return False
+    Main -> Dialog: Display validation error
+    Dialog -> User: Show validation message
+end
+
+
+== Delete Test Case ==
+
+User -> Main: Select Delete Test Case
+Main -> Dialog: Request test case number
+Dialog -> User: Enter test case number
+User -> Dialog: Enter TC_01
+Dialog --> Main: Return test case number
+
+Main -> Manager: find_test_case(TC_01)
+Manager -> Manager: Normalize and validate test case number
+Manager -> Repository: find_by_number(TC_01)
+Repository --> Manager: Return TestCase object or None
+
+alt Test case found
+    Manager --> Main: Return TestCase object
+    Main -> Dialog: Ask for deletion confirmation
+    Dialog -> User: Confirm deletion?
+    User -> Dialog: Confirm or cancel
+    Dialog --> Main: Return confirmation
+
+    alt User confirms
+        Main -> Manager: delete_test_case(TC_01)
+        Manager -> Repository: delete(TC_01)
+        Repository --> Manager: Return True
+        Manager --> Main: Return True
+        Main -> Dialog: Display success message
+        Dialog -> User: Show deletion successful
+
+    else User cancels
+        Main -> Dialog: Display cancellation message
+        Dialog -> User: Show deletion cancelled
+    end
+
+else Test case not found or invalid
+    Manager --> Main: Return None
+    Main -> Dialog: Display error message
+    Dialog -> User: Show test case not found or invalid
+end
+
+
+== Exit Application ==
+
+User -> Main: Select Exit
+Main -> Main: Set application_running = False
+Main -> Dialog: Display goodbye message
+Dialog -> User: Show goodbye message
+
+
+== Invalid Menu Choice ==
+
+Main -> Dialog: Display menu
+Dialog -> User: Request menu choice
+User -> Dialog: Enter invalid menu choice
+Dialog --> Main: Return invalid choice
+Main -> Dialog: Display error message
+Dialog -> User: Show invalid choice message
+
+@enduml

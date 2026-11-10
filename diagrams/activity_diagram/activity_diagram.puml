@@ -1,0 +1,82 @@
+
+@startuml
+title Testfallregister - Activity Diagram
+
+start
+
+:Initialize TestCaseRepository and TestCaseManager;
+:Application running = true;
+
+while (Application running?) is (Yes)
+
+    :Display menu;
+    :User enters menu choice;
+
+    switch (Menu choice?)
+
+        case (1 - Add test case)
+            :Enter title, description\nand expected result;
+            :Validate input;
+
+            if (Input valid?) then (Yes)
+                :Create and save test case;
+                :Display success message;
+            else (No)
+                :Display validation error;
+            endif
+
+        case (2 - Show test cases)
+            :Display all saved test cases;
+
+        case (3 - Edit test case)
+            :Enter test case number;
+            :Enter new title, description\nand expected result;
+            :Validate input;
+
+            if (Input valid?) then (Yes)
+                :Search for test case;
+
+                if (Test case found?) then (Yes)
+                    :Update test case information;
+                    :Display success message;
+                else (No)
+                    :Display error message;
+                endif
+
+            else (No)
+                :Display validation error;
+            endif
+
+        case (4 - Delete test case)
+            :Enter test case number;
+            :Search for test case;
+
+            if (Test case found?) then (Yes)
+                :Ask for deletion confirmation;
+
+                if (User confirms?) then (Yes)
+                    :Delete test case;
+                    :Display success message;
+                else (No)
+                    :Cancel deletion;
+                    :Display cancellation message;
+                endif
+
+            else (No)
+                :Display error message;
+            endif
+
+        case (5 - Exit)
+            :Set application running = false;
+
+        case (Invalid choice)
+            :Display error message;
+
+    endswitch
+
+endwhile (No)
+
+:Display goodbye message;
+
+stop
+@enduml

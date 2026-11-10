@@ -1,0 +1,39 @@
+
+@startuml
+title Testfallregister - Class Diagram
+
+skinparam classAttributeIconSize 0
+
+class TestCase {
+    +id : UUID
+    +test_case_number : str
+    +title : str
+    +description : str
+    +expected_result : str
+}
+
+class TestCaseRepository {
+    -test_cases : List[TestCase]
+    -next_number : int
+
+    +generate_test_case_number() : str
+    +add(test_case : TestCase) : void
+    +get_all() : List[TestCase]
+    +find_by_number(test_case_number : str) : Optional[TestCase]
+    +delete(test_case_number : str) : bool
+}
+
+class TestCaseManager {
+    -repository : TestCaseRepository
+
+    +add_test_case(title : str, description : str, expected_result : str) : str
+    +find_test_case(test_case_number : str) : Optional[TestCase]
+    +show_test_cases() : List[TestCase]
+    +edit_test_case(test_case_number : str, title : str, description : str, expected_result : str) : bool
+    +delete_test_case(test_case_number : str) : bool
+}
+
+TestCaseManager --> TestCaseRepository : uses
+TestCaseRepository "1" o-- "0..*" TestCase : stores
+
+@enduml
